@@ -1,1 +1,3 @@
 # veritas
+
+Collect. Organize. Train.
