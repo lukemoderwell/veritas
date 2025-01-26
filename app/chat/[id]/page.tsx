@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from 'ai/react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,24 +21,17 @@ interface ChatInfo {
 
 export default function ChatDetail() {
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [chatInfo, setChatInfo] = useState<ChatInfo | null>(null);
   const initialMessage = searchParams.get('message');
 
-  const {
-    messages,
-    input,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    setMessages,
-  } = useChat({
-    id: params.id as string,
-    initialMessages: initialMessage
-      ? [{ id: '0', role: 'user', content: initialMessage }]
-      : [],
-  });
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      id: params.id as string,
+      initialMessages: initialMessage
+        ? [{ id: '0', role: 'user', content: initialMessage }]
+        : [],
+    });
 
   useEffect(() => {
     // In a real app, fetch the chat info from an API or local storage
@@ -53,7 +46,7 @@ export default function ChatDetail() {
 
     // If there's an initial message, trigger the AI response
     if (initialMessage && messages.length === 1) {
-      handleSubmit(new Event('submit') as any);
+      handleSubmit(new Event('submit') as unknown as React.FormEvent<HTMLFormElement>);
     }
   }, [params.id, initialMessage, messages.length, handleSubmit]);
 

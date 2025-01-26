@@ -7,25 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PastChats } from '@/components/past-chats';
 import { MessageSquarePlus } from 'lucide-react';
 
-const commonPrompts = [
-  {
-    title: 'Order new parts',
-    description: 'Learn how to submit an order form for machine shop parts',
-  },
-  {
-    title: 'Expense reports',
-    description: 'Get guidance on submitting expense reports',
-  },
-  {
-    title: 'IT support',
-    description: 'Find out how to request IT support or equipment',
-  },
-  {
-    title: 'HR processes',
-    description: 'Learn about common HR procedures and policies',
-  },
-];
-
 interface PastChat {
   id: string;
   title: string;
@@ -35,6 +16,7 @@ interface PastChat {
 
 export default function Chat() {
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userName, setUserName] = useState('Nate');
   const [pastChats, setPastChats] = useState<PastChat[]>([]);
 
