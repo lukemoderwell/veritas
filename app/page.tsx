@@ -1,13 +1,11 @@
 'use client';
 
-import { useChat } from 'ai/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { PaperclipIcon, SendIcon } from 'lucide-react';
 import { PastChats } from '@/components/past-chats';
+import { MessageSquarePlus } from 'lucide-react';
 
 const commonPrompts = [
   {
@@ -37,7 +35,6 @@ interface PastChat {
 
 export default function Chat() {
   const router = useRouter();
-  const { input, handleInputChange } = useChat();
   const [userName, setUserName] = useState('Nate');
   const [pastChats, setPastChats] = useState<PastChat[]>([]);
 
@@ -66,24 +63,9 @@ export default function Chat() {
     setPastChats(mockPastChats);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    // Generate a unique chat ID
+  const handleNewConversation = () => {
     const chatId = Math.random().toString(36).substring(7);
-
-    // In a real app, you'd save the new chat to your backend or local storage here
-    const newChat: PastChat = {
-      id: chatId,
-      title: input.slice(0, 30) + (input.length > 30 ? '...' : ''),
-      lastMessage: input,
-      timestamp: 'Just now',
-    };
-    setPastChats([newChat, ...pastChats]);
-
-    // Pass the initial message as a query parameter
-    router.push(`/chat/${chatId}?message=${encodeURIComponent(input)}`);
+    router.push(`/chat/${chatId}`);
   };
 
   return (
@@ -99,22 +81,35 @@ export default function Chat() {
               What would you like to know?
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Ask about company processes or select a common topic below
+              Start a new conversation or select a common topic below
             </p>
           </div>
 
+          {/* New Conversation CTA */}
+          <Button
+            onClick={handleNewConversation}
+            className="w-full mb-8"
+            size="lg"
+          >
+            <MessageSquarePlus className="mr-2 h-5 w-5" />
+            New Conversation
+          </Button>
+
           {/* Common Prompts */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {commonPrompts.map((prompt, index) => (
               <Button
                 key={index}
                 variant="outline"
                 className="h-auto p-4 flex flex-col items-start space-y-2"
-                onClick={() =>
-                  handleInputChange({
-                    target: { value: `Tell me about: ${prompt.title}` },
-                  } as any)
-                }
+                onClick={() => {
+                  const chatId = Math.random().toString(36).substring(7);
+                  router.push(
+                    `/chat/${chatId}?message=${encodeURIComponent(
+                      `Tell me about: ${prompt.title}`
+                    )}`
+                  );
+                }}
               >
                 <span className="font-semibold">{prompt.title}</span>
                 <span className="text-sm text-muted-foreground">
@@ -122,30 +117,7 @@ export default function Chat() {
                 </span>
               </Button>
             ))}
-          </div>
-
-          {/* Input Form */}
-          <form onSubmit={handleSubmit} className="flex gap-2 mb-8">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="shrink-0"
-            >
-              <PaperclipIcon className="h-4 w-4" />
-              <span className="sr-only">Attach file</span>
-            </Button>
-            <Input
-              value={input}
-              onChange={handleInputChange}
-              placeholder="Ask about any company process..."
-              className="flex-1"
-            />
-            <Button type="submit" className="shrink-0">
-              <SendIcon className="h-4 w-4 mr-2" />
-              Send
-            </Button>
-          </form>
+          </div> */}
 
           {/* Past Chats */}
           <div>

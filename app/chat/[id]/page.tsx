@@ -4,7 +4,12 @@ import { useChat } from 'ai/react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardFooter,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, PaperclipIcon, SendIcon, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
@@ -42,13 +47,12 @@ export default function ChatDetail() {
       title: initialMessage
         ? initialMessage.slice(0, 30) +
           (initialMessage.length > 30 ? '...' : '')
-        : `Chat #${params.id}`,
+        : `New Conversation`,
     };
     setChatInfo(mockChatInfo);
 
     // If there's an initial message, trigger the AI response
     if (initialMessage && messages.length === 1) {
-      handleInputChange({ target: { value: initialMessage } } as any);
       handleSubmit(new Event('submit') as any);
     }
   }, [params.id, initialMessage, messages.length, handleSubmit]);
@@ -59,7 +63,7 @@ export default function ChatDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <Card className="max-w-4xl mx-auto">
+      <Card className="max-w-4xl mx-auto h-[calc(100vh-2rem)] flex flex-col">
         <CardHeader className="border-b">
           <div className="flex items-center gap-4">
             <Link href="/">
@@ -75,9 +79,9 @@ export default function ChatDetail() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="flex-grow overflow-auto p-6">
           {/* Chat Messages */}
-          <div className="space-y-4 mb-4 min-h-[400px] max-h-[600px] overflow-y-auto">
+          <div className="space-y-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -104,9 +108,10 @@ export default function ChatDetail() {
               </div>
             )}
           </div>
-
+        </CardContent>
+        <CardFooter className="border-t p-4">
           {/* Input Form */}
-          <form onSubmit={handleSubmit} className="flex gap-2">
+          <form onSubmit={handleSubmit} className="flex gap-2 w-full">
             <Button
               type="button"
               variant="outline"
@@ -119,15 +124,15 @@ export default function ChatDetail() {
             <Input
               value={input}
               onChange={handleInputChange}
-              placeholder="Continue the conversation..."
-              className="flex-1"
+              placeholder="Type your message..."
+              className="flex-grow"
             />
             <Button type="submit" className="shrink-0">
               <SendIcon className="h-4 w-4 mr-2" />
               Send
             </Button>
           </form>
-        </CardContent>
+        </CardFooter>
       </Card>
     </div>
   );
