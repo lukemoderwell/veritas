@@ -1,3 +1,3 @@
-# veritas
+# veritas web
 
 Collect. Organize. Train.
