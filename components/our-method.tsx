@@ -40,7 +40,7 @@ export function OurMethod() {
   return (
     <div className="bg-background py-16 md:py-24">
       <div className="container px-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-[1000px] mx-auto">
           <h2 className="text-3xl md:text-4xl mb-6">Our Method</h2>
           <p className="text-lg text-muted-foreground mb-12 body-text">
             Our structured approach ensures effective knowledge transfer and retention, tailored to your organization's

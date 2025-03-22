@@ -15,7 +15,7 @@ export function Navbar() {
 
   return (
     <header className="z-50 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="px-4 flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center">
             <Image

@@ -1,14 +1,15 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Play } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { CalendlyEmbed } from "./calendly-embed"
+import { useState } from 'react';
+import Image from 'next/image';
+import { Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { CalendlyEmbed } from './calendly-embed';
 
 export function Hero() {
-  const [videoOpen, setVideoOpen] = useState(false)
-  const [calendlyOpen, setCalendlyOpen] = useState(false)
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [calendlyOpen, setCalendlyOpen] = useState(false);
 
   return (
     <div className="relative bg-veritas-beige/20">
@@ -16,16 +17,20 @@ export function Hero() {
         <div className="grid gap-8 md:grid-cols-2 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Employees retire. <br/>
+              Employees retire. <br />
               Their knowledge can keep working.
             </h1>
             <p className="text-xl text-muted-foreground max-w-[600px] body-text">
-              We listen closely to retiring employees and transfer what they know to your rising team.
+              We listen closely to retiring employees and transfer what they
+              know to your rising team.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Dialog open={calendlyOpen} onOpenChange={setCalendlyOpen}>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="w-full sm:w-auto bg-veritas-blue hover:bg-veritas-blue/90">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto bg-veritas-blue hover:bg-veritas-blue/90"
+                  >
                     Book a Consultation
                   </Button>
                 </DialogTrigger>
@@ -45,20 +50,27 @@ export function Hero() {
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[800px] p-0">
                   <div className="aspect-video w-full bg-muted flex items-center justify-center">
-                    <p className="text-muted-foreground body-text">Video player would be embedded here</p>
+                    <p className="text-muted-foreground body-text">
+                      Video player would be embedded here
+                    </p>
                   </div>
                 </DialogContent>
               </Dialog>
             </div>
           </div>
-          <div className="relative aspect-video md:aspect-square rounded-lg overflow-hidden bg-veritas-blue/20 border border-veritas-blue/30">
+          <div className="relative aspect-video rounded-lg overflow-hidden bg-veritas-blue/20 border border-veritas-blue/30 p-2">
             <div className="absolute inset-0 flex items-center justify-center">
-              <img src="https://mail.google.com/mail/u/1?ui=2&ik=f6eadba476&attid=0.1&permmsgid=msg-f:1826493052188507100&th=195901c0f86a3bdc&view=fimg&fur=ip&permmsgid=msg-f:1826493052188507100&sz=s0-l75-ft&attbid=ANGjdJ9gMw76uCDRg-OrFs1NJL57Do8-jWjRsPRqaQOk795cxtemYlJqo7Fy1rg8yGjSk3KsRjMmXw9X-P8Fc6HefUazlcISyTO94YS5RRDU6-YsawYpJpSD45WunTE&disp=emb&realattid=ii_m87i2nea0&zw" />
+              <Image
+                src="/img/illinois-oil.png"
+                alt="Illinois Oil"
+                width={650}
+                height={367}
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
