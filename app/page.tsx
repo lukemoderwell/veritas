@@ -1,11 +1,11 @@
-import { Navbar } from "@/components/navbar"
-import { Sidebar } from "@/components/sidebar"
-import { Hero } from "@/components/hero"
-import { OurMethod } from "@/components/our-method"
-import { CaseStudies } from "@/components/case-studies"
-import { Testimonials } from "@/components/testimonials"
-import { NextSteps } from "@/components/next-steps"
-import { Footer } from "@/components/footer"
+import { Navbar } from '@/components/navbar';
+import { Sidebar } from '@/components/sidebar';
+import { Hero } from '@/components/hero';
+import { OurMethod } from '@/components/our-method';
+import { CaseStudies } from '@/components/case-studies';
+import { Testimonials } from '@/components/testimonials';
+import { NextSteps } from '@/components/next-steps';
+import { Footer } from '@/components/footer';
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
       <Hero />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1">
+        <main className="flex-1 w-full">
           <section id="our-method" className="scroll-mt-20">
             <OurMethod />
           </section>
@@ -31,6 +31,5 @@ export default function Home() {
         </main>
       </div>
     </div>
-  )
+  );
 }
-
