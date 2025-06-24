@@ -11,6 +11,43 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user"
   const isAssistant = message.role === "assistant"
 
+  const renderContent = () => {
+    if (typeof message.content === "string") {
+      return <span style={{ whiteSpace: "pre-wrap" }}>{message.content}</span>
+    }
+
+    // Handle array of content parts (multimodal message)
+    if (Array.isArray(message.content)) {
+      return message.content.map((part, index) => {
+        if (part.type === "text") {
+          return (
+            <span key={index} style={{ whiteSpace: "pre-wrap" }}>
+              {part.text}
+            </span>
+          )
+        }
+        if (part.type === "image" && typeof part.image === "string") {
+          // Assuming part.image is a data URL
+          return (
+            <div key={index} className="my-2 relative block w-full max-w-xs">
+              <Image
+                src={part.image || "/placeholder.svg"}
+                alt={`User uploaded content ${index + 1}`}
+                width={300} // Provide a base width for aspect ratio calculation
+                height={200} // Provide a base height
+                className="rounded-md object-contain max-h-64" // Constrain height, object-contain preserves aspect
+                style={{ width: "auto", height: "auto", maxWidth: "100%" }} // Responsive styling
+              />
+            </div>
+          )
+        }
+        // Add handling for other part types if necessary in the future
+        return null
+      })
+    }
+    return null // Should not happen if content is string or array
+  }
+
   return (
     <div className={cn("flex mb-8", isUser ? "justify-end" : "justify-start")}>
       <div
@@ -21,8 +58,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             <Image src="/veritas-logo.jpg" alt="Veritas Assistant" layout="fill" objectFit="contain" className="p-1" />
           </div>
         )}
-        <div className="flex flex-col gap-4 w-full">
-          {/* Text content */}
+        <div className="flex flex-col gap-1 w-full">
+          {" "}
+          {/* Reduced gap for tighter content parts */}
+          {/* Content (text and/or images) */}
           {message.content && (
             <div
               className={cn(
@@ -30,21 +69,26 @@ export default function ChatMessage({ message }: ChatMessageProps) {
                 isUser ? "bg-gray-900 text-white ml-auto max-w-md" : "bg-gray-50 text-gray-900",
               )}
             >
-              <span style={{ whiteSpace: "pre-wrap" }}>{message.content}</span>
+              {renderContent()}
             </div>
           )}
-
-          {/* Tool invocations (video search results) */}
-          {message.toolInvocations?.map((toolInvocation) => {
-            if (toolInvocation.toolName === "searchVideos" && toolInvocation.result) {
-              return (
-                <div key={toolInvocation.toolCallId} className="w-full">
-                  <VideoSearchResults searchResult={toolInvocation.result} query={toolInvocation.args.query} />
-                </div>
-              )
-            }
-            return null
-          })}
+          {/* Tool invocations (video search results) - for assistant messages */}
+          {isAssistant &&
+            message.toolInvocations?.map((toolInvocation) => {
+              if (toolInvocation.toolName === "searchVideos" && toolInvocation.result) {
+                return (
+                  <div key={toolInvocation.toolCallId} className="w-full mt-2">
+                    {" "}
+                    {/* Added mt-2 for spacing */}
+                    <VideoSearchResults
+                      searchResult={toolInvocation.result}
+                      query={(toolInvocation.args as any)?.query || "your request"}
+                    />
+                  </div>
+                )
+              }
+              return null
+            })}
         </div>
       </div>
     </div>
