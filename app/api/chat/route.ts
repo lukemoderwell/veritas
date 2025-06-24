@@ -1,4 +1,4 @@
-import { streamText, tool } from "ai"
+import { streamText, tool, type CoreMessage } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
 import type { NextRequest } from "next/server"
@@ -175,9 +175,11 @@ async function processSearchResults(apiResponse: any, query: string, indexId: st
 // Tool for searching videos using direct API calls
 const searchVideos = tool({
   description:
-    "Search through video content to find specific moments, scenes, or information related to equipment, procedures, training, or safety.",
+    "Search through video content to find specific moments, scenes, or information related to equipment, procedures, training, or safety. This tool is also used if the user provides an image to find related video content.",
   parameters: z.object({
-    query: z.string().describe("The search query to find relevant video content."),
+    query: z
+      .string()
+      .describe("The search query (textual description if derived from an image) to find relevant video content."),
     indexId: z.string().optional().describe("The index ID to search in (optional)."),
   }),
   execute: async ({ query, indexId }) => {
@@ -279,11 +281,11 @@ const searchVideos = tool({
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json()
-    console.log("💬 Chat API route: Request received with", messages.length, "messages.")
+    const { messages }: { messages: CoreMessage[] } = await req.json() // Use CoreMessage for type safety
+    console.log("💬 Chat API route: Request received with messages:", JSON.stringify(messages, null, 2))
 
     const result = await streamText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4o"), // GPT-4o supports multimodal inputs
       messages,
       tools: {
         searchVideos,
@@ -293,39 +295,46 @@ export async function POST(req: NextRequest) {
 IMPORTANT INSTRUCTIONS:
 
 1. CONVERSATIONAL FLOW:
-   - ALWAYS respond immediately to the user's question with a conversational acknowledgment before calling any tools
-   - Example: If user asks "Fix car tire", respond with "I'll search our video library for tire repair procedures and safety guidelines."
-   - Be natural and helpful in your initial response
+   - ALWAYS respond immediately to the user's question/input with a conversational acknowledgment before calling any tools.
+   - If the user provides an image (with or without text):
+     - Acknowledge receiving the image.
+     - Briefly state you will analyze it and search for related videos. E.g., "Thanks for the image! I'll analyze it and search our video library for related content."
+   - If the user provides only text:
+     - Acknowledge the query. E.g., "Okay, I'll search for videos about [user's query topic]."
 
-2. TOOL USAGE:
-   - ALWAYS use the 'searchVideos' tool when a user's query mentions or implies:
-     * Specific equipment (e.g., "boiler hydraulic arm", "wiring diagram", "machine X")
-     * Procedures or processes (e.g., "how to fix Y", "safety protocol for Z", "onboarding steps")
-     * Training material (e.g., "training video for new hires", "maintenance guide")
-     * Troubleshooting (e.g., "error code 123", "machine malfunction")
-   - Do NOT attempt to answer these types of questions from general knowledge. Your knowledge base is the video library.
-   - When you use the 'searchVideos' tool, the 'query' parameter should be a concise and relevant search term derived from the user's question.
+2. TOOL USAGE (searchVideos):
+   - If the user provides an image:
+     - Your primary task is to understand the content of the image.
+     - Generate a concise textual description of the image's key elements relevant to a potential video search.
+     - Use this textual description as the 'query' parameter for the 'searchVideos' tool.
+   - If the user provides text (with or without an image):
+     - Use the user's text (or a summary if it's long, or combined with image description if applicable) as the 'query' for 'searchVideos'.
+   - ALWAYS use 'searchVideos' for queries related to equipment, procedures, training, safety, or if an image is provided for visual search.
+   - Do NOT answer from general knowledge for these topics.
 
 3. AFTER TOOL RESULTS:
-   - After receiving search results, provide helpful context about what was found
-   - Give guidance on how to use the videos (e.g., "Start with the first video for the main procedure, then check the additional clips for specific troubleshooting steps")
-   - Explain the order or priority of watching the videos when relevant
-   - Be encouraging and supportive
+   - Provide helpful context about what was found based on the text/image query.
+   - Give guidance on how to use the videos.
+   - Explain the order or priority of watching the videos when relevant.
 
 4. VIDEO PRESENTATION:
-   - The first video will be displayed as a full player, and additional videos will appear as clickable thumbnail cards below it
-   - Users can click on thumbnail cards to switch the main video
-   - Provide context about what each video covers when possible
+   - The first video is displayed as a full player, additional videos as clickable thumbnails.
+   - Provide context about what each video covers.
 
 5. ERROR HANDLING:
-   - If no relevant videos are found, inform the user and suggest they rephrase their query or contact a supervisor
-   - Always be helpful and offer alternatives
+   - If no relevant videos are found, inform the user.
 
-Example interaction:
+Example (Image-only query):
+User: [Uploads image of a specific valve]
+Assistant: "Thanks for sending that image of the valve. I'll analyze it and search our video library for maintenance procedures or identification guides related to it."
+[Tool call: AI generates query like "maintenance for red handle ball valve" based on image]
+Assistant: "Okay, I found 2 videos that seem relevant to the valve in your image. The first one shows a general overview of this valve type, and the second is a detailed guide on replacing its seals. Take a look!"
+
+Example (Text query):
 User: "How do I fix a car tire?"
 Assistant: "I'll search our video library for tire repair procedures and safety guidelines."
 [Tool call executes]
-Assistant: "Great! I found 3 relevant videos covering tire repair. Start with the first video which covers the complete tire changing process, then check out the additional clips below for specific safety tips and troubleshooting common issues. Click on any thumbnail to switch videos if you need to focus on a particular aspect."
+Assistant: "Great! I found 3 relevant videos covering tire repair..."
 
 Be conversational, helpful, and always acknowledge the user's request before and after tool execution.`,
       onToolCall: ({ toolCall }) => {
@@ -342,7 +351,7 @@ Be conversational, helpful, and always acknowledge the user's request before and
 
     return result.toDataStreamResponse()
   } catch (error: any) {
-    console.error("❌ Chat API route: Error in POST handler:", error?.message || error)
+    console.error("❌ Chat API route: Error in POST handler:", error?.message || error, error.stack)
     return new Response(JSON.stringify({ error: "Internal Server Error", details: error?.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
