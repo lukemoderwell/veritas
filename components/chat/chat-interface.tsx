@@ -183,6 +183,7 @@ export default function ChatInterface() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                {/*
                   <div className="flex items-center space-x-2">
                     <Switch
                       id="web-search-toggle-initial"
@@ -197,6 +198,7 @@ export default function ChatInterface() {
                       Use web results
                     </Label>
                   </div>
+                  */}
                   <Button
                     type="submit"
                     disabled={isLoading || !input.trim()}
