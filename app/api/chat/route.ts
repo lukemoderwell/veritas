@@ -284,9 +284,49 @@ export async function POST(req: NextRequest) {
     const { messages }: { messages: CoreMessage[] } = await req.json() // Use CoreMessage for type safety
     console.log("💬 Chat API route: Request received with messages:", JSON.stringify(messages, null, 2))
 
+    // Extract the last message (the user's input)
+    const lastMessage = messages[messages.length - 1]
+
+    let query = ""
+    if (typeof lastMessage.content === "string") {
+      query = lastMessage.content
+    } else if (Array.isArray(lastMessage.content)) {
+      // If the content is an array, it's a multimodal message
+      // Extract the text and image data
+      let textContent = ""
+      let imageData = ""
+
+      lastMessage.content.forEach((part) => {
+        if (part.type === "text") {
+          textContent = part.text
+        }
+        if (part.type === "image") {
+          imageData = part.image
+        }
+      })
+
+      // If there's an image, instruct the AI to describe it
+      if (imageData) {
+        query = `Describe this image: ${imageData}. Also, consider this text: ${textContent}`
+      } else {
+        query = textContent // Use the text content directly
+      }
+    }
+
+    console.log("Extracted query:", query)
+
+    const initialResponse = {
+      role: "assistant",
+      content: query
+        ? `Okay, I'm searching the video library for "${query}"...`
+        : "Okay, I'm analyzing the image and searching for related videos...",
+    }
+
+    const updatedMessages = [...messages, initialResponse]
+
     const result = await streamText({
-      model: openai("gpt-4o"), // GPT-4o supports multimodal inputs
-      messages,
+      model: openai("gpt-4o"),
+      messages: updatedMessages,
       tools: {
         searchVideos,
       },
@@ -295,12 +335,13 @@ export async function POST(req: NextRequest) {
 IMPORTANT INSTRUCTIONS:
 
 1. CONVERSATIONAL FLOW:
-   - ALWAYS respond immediately to the user's question/input with a conversational acknowledgment before calling any tools.
+   - ALWAYS respond immediately to the user's question/input with a conversational acknowledgment before calling any tools
    - If the user provides an image (with or without text):
      - Acknowledge receiving the image.
      - Briefly state you will analyze it and search for related videos. E.g., "Thanks for the image! I'll analyze it and search our video library for related content."
    - If the user provides only text:
      - Acknowledge the query. E.g., "Okay, I'll search for videos about [user's query topic]."
+   - If the user provides a combination of text and image, acknowledge both.
 
 2. TOOL USAGE (searchVideos):
    - If the user provides an image:
@@ -313,28 +354,24 @@ IMPORTANT INSTRUCTIONS:
    - Do NOT answer from general knowledge for these topics.
 
 3. AFTER TOOL RESULTS:
-   - Provide helpful context about what was found based on the text/image query.
+   - After receiving search results, provide helpful context about what was found based on the text/image query.
    - Give guidance on how to use the videos.
    - Explain the order or priority of watching the videos when relevant.
 
 4. VIDEO PRESENTATION:
-   - The first video is displayed as a full player, additional videos as clickable thumbnails.
+   - The first video will be displayed as a full player, and additional videos will appear as clickable thumbnail cards below it
+   - Users can click on thumbnail cards to switch the main video
    - Provide context about what each video covers.
 
 5. ERROR HANDLING:
-   - If no relevant videos are found, inform the user.
+   - If no relevant videos are found, inform the user and suggest they rephrase their query or contact a supervisor
+   - Always be helpful and offer alternatives
 
-Example (Image-only query):
+Example interaction (Image-only query):
 User: [Uploads image of a specific valve]
 Assistant: "Thanks for sending that image of the valve. I'll analyze it and search our video library for maintenance procedures or identification guides related to it."
 [Tool call: AI generates query like "maintenance for red handle ball valve" based on image]
 Assistant: "Okay, I found 2 videos that seem relevant to the valve in your image. The first one shows a general overview of this valve type, and the second is a detailed guide on replacing its seals. Take a look!"
-
-Example (Text query):
-User: "How do I fix a car tire?"
-Assistant: "I'll search our video library for tire repair procedures and safety guidelines."
-[Tool call executes]
-Assistant: "Great! I found 3 relevant videos covering tire repair..."
 
 Be conversational, helpful, and always acknowledge the user's request before and after tool execution.`,
       onToolCall: ({ toolCall }) => {
