@@ -81,7 +81,13 @@ export default function ChatInterface() {
     // Include webSearchEnabled in the message data if needed by the backend
     // For example: userMessage.data = { webSearchEnabled };
 
-    append(userMessage)
+    append(userMessage, {
+      data: {
+        webSearchEnabled,
+        timestamp: Date.now(),
+        imageCount: uploadedImages.length,
+      },
+    })
     setInput("")
     setUploadedImages([])
     if (textareaRef.current) {
