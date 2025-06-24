@@ -168,6 +168,7 @@ async function processSearchResults(apiResponse: any, query: string, indexId: st
     success: true,
     results: finalResults,
     totalCount,
+    message: `Found ${finalResults.length} relevant video${finalResults.length !== 1 ? "s" : ""} in the library.`,
   }
 }
 
@@ -270,6 +271,7 @@ const searchVideos = tool({
           },
         ],
         totalCount: 2,
+        message: "Found 2 relevant videos in the library (demo data).",
       }
     }
   },
@@ -296,8 +298,8 @@ IMPORTANT INSTRUCTIONS:
     *   Troubleshooting (e.g., "error code 123", "machine malfunction")
 2.  Do NOT attempt to answer these types of questions from general knowledge. Your knowledge base is the video library.
 3.  When you use the 'searchVideos' tool, the 'query' parameter you pass to the tool should be a concise and relevant search term derived from the user's question.
-4.  After receiving search results, present them clearly to the user. The videos are already sorted by relevance (highest confidence first) and titled "Relevant Clip #1", "Relevant Clip #2", etc.
-5.  IMPORTANT: Between each video result, add a brief connecting paragraph that explains how the videos relate to each other or transitions from one topic to the next. This creates a more conversational flow.
+4.  After receiving search results, first acknowledge the results with the confirmation message returned by the tool, then present the videos clearly to the user. The first video will be displayed as a full player, and additional videos will appear as clickable thumbnail cards below it.
+5.  IMPORTANT: Between video results, add brief connecting paragraphs that explain how the videos relate to each other or provide context about the search results.
 6.  If no relevant videos are found, inform the user and suggest they rephrase their query or contact a supervisor.
 
 Example user query: "How does the wiring on the boiler hydraulic arm work?"
