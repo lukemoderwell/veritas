@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useChat, type Message, type CreateMessage } from "ai/react" // Added CreateMessage
+import { useChat, type Message } from "ai/react" // Added CreateMessage
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -68,30 +68,33 @@ export default function ChatInterface() {
         contentParts.push({ type: "image", image: dataUrl, mimeType: file.type })
       } catch (error) {
         console.error("Error converting file to data URL:", error)
-        // Optionally, inform the user about the error
         return // Stop submission if an image fails to process
       }
     }
 
-    const userMessage: CreateMessage = {
-      role: "user",
-      content: contentParts,
-    }
+    // Use handleSubmit instead of append to properly send data
+    const syntheticEvent = {
+      preventDefault: () => {},
+      target: {
+        elements: {
+          message: { value: JSON.stringify(contentParts) },
+        },
+      },
+    } as any
 
-    // Include webSearchEnabled in the message data if needed by the backend
-    // For example: userMessage.data = { webSearchEnabled };
-
-    append(userMessage, {
+    handleSubmit(syntheticEvent, {
       data: {
         webSearchEnabled,
         timestamp: Date.now(),
         imageCount: uploadedImages.length,
+        contentParts, // Include the actual content parts
       },
     })
+
     setInput("")
     setUploadedImages([])
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto" // Reset height
+      textareaRef.current.style.height = "auto"
     }
   }
 

@@ -1,4 +1,4 @@
-import { streamText, tool, type CoreMessage } from "ai"
+import { streamText, tool } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
 import type { NextRequest } from "next/server"
@@ -281,9 +281,26 @@ const searchVideos = tool({
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, data }: { messages: CoreMessage[]; data?: any } = await req.json()
-    console.log("💬 Chat API route: Request received with messages:", JSON.stringify(messages, null, 2))
-    console.log("📊 Additional data received:", data)
+    const body = await req.json()
+    const { messages, data } = body
+
+    console.log("💬 Chat API route: Request received")
+    console.log("📊 Messages:", JSON.stringify(messages, null, 2))
+    console.log("📊 Additional data:", data)
+
+    // Handle the case where content parts are passed via data
+    let processedMessages = messages
+    if (data?.contentParts && Array.isArray(data.contentParts)) {
+      // Replace the last message content with the properly formatted content parts
+      const lastMessageIndex = messages.length - 1
+      if (lastMessageIndex >= 0) {
+        processedMessages = [...messages]
+        processedMessages[lastMessageIndex] = {
+          ...messages[lastMessageIndex],
+          content: data.contentParts,
+        }
+      }
+    }
 
     // You can now use the data object for additional context
     const webSearchEnabled = data?.webSearchEnabled || false
@@ -294,7 +311,7 @@ export async function POST(req: NextRequest) {
 
     const result = await streamText({
       model: openai("gpt-4o"),
-      messages,
+      messages: processedMessages,
       tools: {
         searchVideos,
       },
@@ -319,8 +336,8 @@ IMPORTANT INSTRUCTIONS:
      - Use this textual description as the 'query' parameter for the 'searchVideos' tool.
    - If the user provides text (with or without an image):
      - Use the user's text (or a summary if it's long, or combined with image description if applicable) as the 'query' for 'searchVideos'.
-   - ALWAYS use 'searchVideos' for queries related to equipment, procedures, training, safety, or if an image is provided for visual search.
-   - Do NOT answer from general knowledge for these topics.
+     - ALWAYS use 'searchVideos' for queries related to equipment, procedures, training, safety, or if an image is provided for visual search.
+     - Do NOT answer from general knowledge for these topics.
 
 3. AFTER TOOL RESULTS:
    - Provide helpful context about what was found based on the text/image query.
