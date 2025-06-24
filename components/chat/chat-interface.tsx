@@ -5,7 +5,9 @@ import type React from "react"
 import { useChat, type Message } from "ai/react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { SendHorizonalIcon, Loader2Icon, PlusIcon, ImageIcon, SearchIcon, MicIcon } from "lucide-react" // Added MicIcon
+import { Switch } from "@/components/ui/switch" // Added Switch import
+import { Label } from "@/components/ui/label" // Added Label import
+import { SendHorizonalIcon, Loader2Icon, PlusIcon, ImageIcon, MicIcon } from "lucide-react" // Removed SearchIcon
 import ChatMessage from "./chat-message"
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react"
 import Image from "next/image"
@@ -180,20 +182,21 @@ export default function ChatInterface() {
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant={webSearchEnabled ? "default" : "ghost"}
-                    size="sm"
-                    className={cn(
-                      "h-9 px-3 rounded-lg text-sm font-medium",
-                      webSearchEnabled ? "bg-gray-900 text-white hover:bg-gray-800" : "text-gray-600 hover:bg-gray-50",
-                    )}
-                    onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                  >
-                    <SearchIcon className="w-4 h-4 mr-1.5" />
-                    Use web results
-                  </Button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="web-search-toggle-initial"
+                      checked={webSearchEnabled}
+                      onCheckedChange={setWebSearchEnabled}
+                      aria-label="Toggle web search"
+                    />
+                    <Label
+                      htmlFor="web-search-toggle-initial"
+                      className="text-sm font-medium text-gray-600 cursor-pointer"
+                    >
+                      Use web results
+                    </Label>
+                  </div>
                   <Button
                     type="submit"
                     disabled={isLoading || !input.trim()}
@@ -424,20 +427,23 @@ export default function ChatInterface() {
                 </Button>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant={webSearchEnabled ? "default" : "ghost"}
-                  size="sm"
-                  className={cn(
-                    "h-8 px-2 rounded-md text-xs font-medium",
-                    webSearchEnabled ? "bg-gray-900 text-white hover:bg-gray-800" : "text-gray-500 hover:bg-gray-50",
-                  )}
-                  onClick={() => setWebSearchEnabled(!webSearchEnabled)}
-                >
-                  <SearchIcon className="w-3 h-3 mr-1" />
-                  Use web results
-                </Button>
+              <div className="flex items-center gap-3">
+                {" "}
+                {/* Increased gap for better spacing */}
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="web-search-toggle-floating"
+                    checked={webSearchEnabled}
+                    onCheckedChange={setWebSearchEnabled}
+                    aria-label="Toggle web search"
+                  />
+                  <Label
+                    htmlFor="web-search-toggle-floating"
+                    className="text-xs font-medium text-gray-500 cursor-pointer"
+                  >
+                    Use web results
+                  </Label>
+                </div>
                 <Button
                   type="submit"
                   disabled={isLoading || !input.trim()}
