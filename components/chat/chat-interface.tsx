@@ -225,7 +225,7 @@ export default function ChatInterface() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center space-x-2">
+                  {/*<div className="flex items-center space-x-2">
                     <Switch
                       id="web-search-toggle-initial"
                       checked={webSearchEnabled}
@@ -255,7 +255,7 @@ export default function ChatInterface() {
                       <SendHorizonalIcon className="w-4 h-4" />
                     )}
                   </Button>
-                </div>
+                </div> */}
               </div>
             </div>
           </form>
